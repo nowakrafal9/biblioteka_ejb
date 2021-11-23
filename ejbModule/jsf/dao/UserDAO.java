@@ -3,62 +3,57 @@ package jsf.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
+import javax.persistence.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import jsf.entities.User;
 
 @Named
 @RequestScoped
 public class UserDAO {
-
-	// simulate finding user in DB
+	private final static String UNIT_NAME = "libraryPU";
+	
+	@PersistenceContext(unitName = UNIT_NAME)
+	protected EntityManager em;
+	
 	public User getUserFromDatabase(String login, String pass) {
-		
 		User u = null;
-
-		if (login.equals("user1") && pass.equals("password")) {
-			u = new User();
-			u.setLogin(login);
-			u.setPassword(pass);
-			u.setName("Jan");
-			u.setSurname("Kowalski");
+		
+		Query query = em.createQuery("FROM User u where u.login=:login");
+		query.setParameter("login", login);
+		
+		try {
+			User user = (User)query.getSingleResult();
+		
+			if(login.equals(user.getLogin()) && pass.equals(user.getPassword())) {
+				u = new User();
+				u.setLogin(login);
+				u.setPassword(pass);
+			} 
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		if (login.equals("user2") && pass.equals("password")) {
-			u = new User();
-			u.setLogin(login);
-			u.setPassword(pass);
-			u.setName("Anna");
-			u.setSurname("Nowak");
-		}
-
-		if (login.equals("user3") && pass.equals("password")) {
-			u = new User();
-			u.setLogin(login);
-			u.setPassword(pass);
-			u.setName("Micha³");
-			u.setSurname("Jaworek");
-		}
-
+				
 		return u;
 	}
-
-	// simulate retrieving roles of a User from DB
+	
 	public List<String> getUserRolesFromDatabase(User user) {
 		
 		ArrayList<String> roles = new ArrayList<String>();
 		
-		if (user.getLogin().equals("user1")) {
-			roles.add("user");
+		if (user.getLogin().equals("admin")) {
+			roles.add("administrator");
 		}
-		if (user.getLogin().equals("user2")) {
-			roles.add("manager");
-		}
-		if (user.getLogin().equals("user3")) {
-			roles.add("admin");
+		else {
+			roles.add("pracownik");
 		}
 		
 		return roles;
 	}
+	
+	
 }
