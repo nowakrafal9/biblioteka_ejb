@@ -10,6 +10,7 @@ import javax.persistence.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import jsf.entities.Role;
 import jsf.entities.User;
 
 @Named
@@ -29,7 +30,7 @@ public class UserDAO {
 		try {
 			User user = (User)query.getSingleResult();
 		
-			if(login.equals(user.getLogin()) && pass.equals(user.getPassword())) {
+			if(login.equals(user.getLogin()) && pass.equals(user.getPassword()) && (user.getStatus() == 1)) {
 				u = new User();
 				u.setLogin(login);
 				u.setPassword(pass);
@@ -42,18 +43,18 @@ public class UserDAO {
 	}
 	
 	public List<String> getUserRolesFromDatabase(User user) {
-		
 		ArrayList<String> roles = new ArrayList<String>();
 		
-		if (user.getLogin().equals("admin")) {
-			roles.add("administrator");
-		}
-		else {
-			roles.add("pracownik");
+		Query query = em.createQuery("SELECT r FROM User u JOIN u.role r where u.login=:login");
+		query.setParameter("login", user.getLogin());
+		
+		try {
+			Role role = (Role)query.getSingleResult();
+			roles.add(role.getName());	
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		return roles;
 	}
-	
-	
 }
