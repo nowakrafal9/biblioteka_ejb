@@ -16,9 +16,11 @@ public class Borrower implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int idBorrower;
+	private Integer idBorrower;
 
 	private String address;
+
+	private String borrowerCode;
 
 	private String city;
 
@@ -41,11 +43,11 @@ public class Borrower implements Serializable {
 	public Borrower() {
 	}
 
-	public int getIdBorrower() {
+	public Integer getIdBorrower() {
 		return this.idBorrower;
 	}
 
-	public void setIdBorrower(int idBorrower) {
+	public void setIdBorrower(Integer idBorrower) {
 		this.idBorrower = idBorrower;
 	}
 
@@ -55,6 +57,14 @@ public class Borrower implements Serializable {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getBorrowerCode() {
+		return this.borrowerCode;
+	}
+
+	public void setBorrowerCode(String borrowerCode) {
+		this.borrowerCode = borrowerCode;
 	}
 
 	public String getCity() {

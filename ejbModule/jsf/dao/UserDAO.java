@@ -3,9 +3,7 @@ package jsf.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
+import javax.ejb.Stateless;
 import javax.persistence.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,8 +11,7 @@ import javax.persistence.PersistenceContext;
 import jsf.entities.Role;
 import jsf.entities.User;
 
-@Named
-@RequestScoped
+@Stateless
 public class UserDAO {
 	private final static String UNIT_NAME = "libraryPU";
 	
