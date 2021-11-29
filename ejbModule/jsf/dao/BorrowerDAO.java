@@ -53,12 +53,19 @@ public class BorrowerDAO {
 		String where = "";
 		String name = (String) filterParams.get("name");
 		String surname = (String) filterParams.get("surname");
+		byte status = (byte) filterParams.get("status");
 
+		if (status == 0 || status == 1) {
+			where = "where b.status =:status";
+		}
 		where = this.createWhere("name", name, where);
 		where = this.createWhere("surname", surname, where);
 
 		Query query = em.createQuery("SELECT b FROM Borrower b " + where);
-
+		
+		if(status == 0 || status == 1) {
+			query.setParameter("status", status);
+		}
 		if (name != null) {
 			query.setParameter("name", name + "%");
 		}
