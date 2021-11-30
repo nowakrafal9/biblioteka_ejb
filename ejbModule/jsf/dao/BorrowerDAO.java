@@ -46,7 +46,7 @@ public class BorrowerDAO {
 
 		return list;
 	}
-
+	
 	public List<Borrower> getList(Map<String, Object> filterParams) {
 		List<Borrower> list = null;
 
@@ -56,7 +56,7 @@ public class BorrowerDAO {
 		byte status = (byte) filterParams.get("status");
 
 		if (status == 0 || status == 1) {
-			where = "where b.status =:status";
+			where = "where b.status =:status ";
 		}
 		where = this.createWhere("name", name, where);
 		where = this.createWhere("surname", surname, where);
@@ -90,7 +90,7 @@ public class BorrowerDAO {
 			} else {
 				where += "and ";
 			}
-			where += "b." + paramName + " like :" + paramName;
+			where += "b." + paramName + " like :" + paramName + " ";
 		}
 
 		return where;
