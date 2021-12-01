@@ -13,7 +13,7 @@ import jsf.entities.Borrower;
 @Stateless
 public class BorrowerDAO {
 	private final static String UNIT_NAME = "libraryPU";
-
+	
 	@PersistenceContext(unitName = UNIT_NAME)
 	protected EntityManager em;
 
@@ -47,7 +47,7 @@ public class BorrowerDAO {
 		return list;
 	}
 	
-	public List<Borrower> getList(Map<String, Object> filterParams) {
+	public List<Borrower> getLazyList(Map<String, Object> filterParams, int offset, int pageSize) {
 		List<Borrower> list = null;
 
 		String where = "";
@@ -56,16 +56,16 @@ public class BorrowerDAO {
 		String surname = (String) filterParams.get("surname");
 		String city = (String) filterParams.get("city");
 		byte status = (byte) filterParams.get("status");
-
+		
 		if (status == 0 || status == 1) {
 			where = "where b.status =:status ";
 		}
 		where = this.createWhere("borrowerCode", borrowerCode, where);
 		where = this.createWhere("name", name, where);
 		where = this.createWhere("surname", surname, where);
-		where = this.createWhere("city", city, where);
+		where = this.createWhere("city", city, where);	
 		
-		Query query = em.createQuery("SELECT b FROM Borrower b " + where);
+		Query query = em.createQuery("SELECT b FROM Borrower b " + where).setFirstResult(offset).setMaxResults(pageSize);
 		
 		if(status == 0 || status == 1) {
 			query.setParameter("status", status);
@@ -90,7 +90,52 @@ public class BorrowerDAO {
 		}
 		return list;
 	}
+	
+	public long countLazyList(Map<String, Object> filterParams) {
+		long count = 0;
+		
+		String where = "";
+		String borrowerCode = (String) filterParams.get("borrowerCode");
+		String name = (String) filterParams.get("name");
+		String surname = (String) filterParams.get("surname");
+		String city = (String) filterParams.get("city");
+		byte status = (byte) filterParams.get("status");
+		
+		if (status == 0 || status == 1) {
+			where = "where b.status =:status ";
+		}
+		where = this.createWhere("borrowerCode", borrowerCode, where);
+		where = this.createWhere("name", name, where);
+		where = this.createWhere("surname", surname, where);
+		where = this.createWhere("city", city, where);	
 
+		Query query = em.createQuery("SELECT COUNT(b) FROM Borrower b " + where);
+
+		if(status == 0 || status == 1) {
+			query.setParameter("status", status);
+		}
+		if (borrowerCode != null) {
+			query.setParameter("borrowerCode", "%" + borrowerCode + "%");
+		}
+		if (name != null) {
+			query.setParameter("name", name + "%");
+		}
+		if (surname != null) {
+			query.setParameter("surname", surname + "%");
+		}
+		if (city != null) {
+			query.setParameter("city", city + "%");
+		}
+		
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return count;
+	}
+	
 	private String createWhere(String paramName, String param, String currentWhere) {
 		String where = currentWhere;
 
