@@ -51,20 +51,27 @@ public class BorrowerDAO {
 		List<Borrower> list = null;
 
 		String where = "";
+		String borrowerCode = (String) filterParams.get("borrowerCode");
 		String name = (String) filterParams.get("name");
 		String surname = (String) filterParams.get("surname");
+		String city = (String) filterParams.get("city");
 		byte status = (byte) filterParams.get("status");
 
 		if (status == 0 || status == 1) {
 			where = "where b.status =:status ";
 		}
+		where = this.createWhere("borrowerCode", borrowerCode, where);
 		where = this.createWhere("name", name, where);
 		where = this.createWhere("surname", surname, where);
-
+		where = this.createWhere("city", city, where);
+		
 		Query query = em.createQuery("SELECT b FROM Borrower b " + where);
 		
 		if(status == 0 || status == 1) {
 			query.setParameter("status", status);
+		}
+		if (borrowerCode != null) {
+			query.setParameter("borrowerCode", "%" + borrowerCode + "%");
 		}
 		if (name != null) {
 			query.setParameter("name", name + "%");
@@ -72,7 +79,10 @@ public class BorrowerDAO {
 		if (surname != null) {
 			query.setParameter("surname", surname + "%");
 		}
-
+		if (city != null) {
+			query.setParameter("city", city + "%");
+		}
+		
 		try {
 			list = query.getResultList();
 		} catch (Exception e) {
