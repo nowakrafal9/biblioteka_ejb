@@ -11,12 +11,12 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Bookinfo.findAll", query="SELECT b FROM Bookinfo b")
-public class Bookinfo implements Serializable {
+public class Bookinfo /* TitleInfo */ implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int idTitle;
+	private Integer idTitle;
 
 	private String code;
 
@@ -46,11 +46,11 @@ public class Bookinfo implements Serializable {
 	public Bookinfo() {
 	}
 
-	public int getIdTitle() {
+	public Integer getIdTitle() {
 		return this.idTitle;
 	}
 
-	public void setIdTitle(int idTitle) {
+	public void setIdTitle(Integer idTitle) {
 		this.idTitle = idTitle;
 	}
 
