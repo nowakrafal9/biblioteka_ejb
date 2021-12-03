@@ -1,4 +1,4 @@
-package jsf.QuerryClass;
+package jsf.queryParam;
 
 public class BookInfoParam {
 	private String code;

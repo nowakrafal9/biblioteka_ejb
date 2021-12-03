@@ -8,8 +8,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import jsf.QuerryClass.BookInfoParam;
 import jsf.entities.Bookinfo;
+import jsf.queryParam.BookInfoParam;
 
 @Stateless
 public class BookInfoDAO /* TitleInfoDAO */ {
