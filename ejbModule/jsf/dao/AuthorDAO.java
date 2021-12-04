@@ -1,8 +1,11 @@
 package jsf.dao;
 
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import jsf.entities.Author;
 
@@ -26,5 +29,19 @@ public class AuthorDAO {
 
 	public Author find(Object id) {
 		return em.find(Author.class, id);
+	}
+	
+	public List<Author> getFullList() {
+		List<Author> list = null;
+
+		Query query = em.createQuery("SELECT a FROM Author a");
+
+		try {
+			list = query.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
 	}
 }

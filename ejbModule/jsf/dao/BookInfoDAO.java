@@ -8,15 +8,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import jsf.entities.Author;
 import jsf.entities.Bookinfo;
-import jsf.queryParam.BookInfoParam;
+import jsf.entities.Publisher;
 
 @Stateless
 public class BookInfoDAO /* TitleInfoDAO */ {
 	private final static String UNIT_NAME = "libraryPU";
 	private Query query;
 
-	BookInfoParam queryFilter = new BookInfoParam();
+	Bookinfo queryFilter = new Bookinfo();
 
 	@PersistenceContext(unitName = UNIT_NAME)
 	protected EntityManager em;
@@ -37,6 +38,14 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return em.find(Bookinfo.class, id);
 	}
 
+	public Bookinfo getQueryFilter() {
+		return queryFilter;
+	}
+
+	public void setQueryFilter(Bookinfo queryFilter) {
+		this.queryFilter = queryFilter;
+	}
+
 	public List<Bookinfo> getFullList() {
 		List<Bookinfo> list = null;
 
@@ -55,7 +64,8 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		List<Bookinfo> list = null;
 
 		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT b FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where).setFirstResult(offset).setMaxResults(pageSize);
+		query = em.createQuery("SELECT b FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where)
+				.setFirstResult(offset).setMaxResults(pageSize);
 		this.setFilterParam(filterParams);
 
 		try {
@@ -63,9 +73,9 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println(filterParams);
-		
+
 		return list;
 	}
 
@@ -73,7 +83,8 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		long count = 0;
 
 		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT COUNT(b) FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where);
+		query = em
+				.createQuery("SELECT COUNT(b) FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where);
 		this.setFilterParam(filterParams);
 
 		try {
@@ -81,24 +92,30 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return count;
 	}
 
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 
+		Author a = new Author();
+		a.setName((String) filterParams.get("name"));
+		a.setSurname((String) filterParams.get("surname"));
+
+		Publisher p = new Publisher();
+		p.setName((String) filterParams.get("publisher"));
+
 		queryFilter.setCode((String) filterParams.get("code"));
-		queryFilter.setName((String) filterParams.get("name"));
-		queryFilter.setSurname((String) filterParams.get("surname"));
 		queryFilter.setTitle((String) filterParams.get("title"));
-		queryFilter.setPublisher((String) filterParams.get("publisher"));
+		queryFilter.setAuthor(a);
+		queryFilter.setPublisher(p);
 
 		where = this.createWhere("code", queryFilter.getCode(), where);
-		where = this.createWhere("name", queryFilter.getName(), where);
-		where = this.createWhere("surname", queryFilter.getSurname(), where);
 		where = this.createWhere("title", queryFilter.getTitle(), where);
-		where = this.createWhere("publisher", queryFilter.getPublisher(), where);
+		where = this.createWhere("name", queryFilter.getAuthor().getName(), where);
+		where = this.createWhere("surname", queryFilter.getAuthor().getSurname(), where);
+		where = this.createWhere("publisher", queryFilter.getPublisher().getName(), where);
 
 		return where;
 	}
@@ -110,14 +127,14 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		if (queryFilter.getTitle() != null) {
 			query.setParameter("title", "%" + queryFilter.getTitle() + "%");
 		}
-		if (queryFilter.getName() != null) {
-			query.setParameter("name", "%" + queryFilter.getName() + "%");
+		if (queryFilter.getAuthor().getName() != null) {
+			query.setParameter("name", "%" + queryFilter.getAuthor().getName() + "%");
 		}
-		if (queryFilter.getSurname() != null) {
-			query.setParameter("surname", "%" + queryFilter.getSurname() + "%");
+		if (queryFilter.getAuthor().getSurname() != null) {
+			query.setParameter("surname", "%" + queryFilter.getAuthor().getSurname() + "%");
 		}
-		if (queryFilter.getPublisher() != null) {
-			query.setParameter("publisher", "%" + queryFilter.getPublisher() + "%");
+		if (queryFilter.getPublisher().getName() != null) {
+			query.setParameter("publisher", "%" + queryFilter.getPublisher().getName() + "%");
 		}
 	}
 
