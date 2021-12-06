@@ -74,8 +74,6 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 			e.printStackTrace();
 		}
 
-		System.out.println(filterParams);
-
 		return list;
 	}
 

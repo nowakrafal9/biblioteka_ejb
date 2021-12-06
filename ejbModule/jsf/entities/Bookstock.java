@@ -16,7 +16,7 @@ public class Bookstock implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private int idBook;
+	private Integer idBook;
 
 	private String code;
 
