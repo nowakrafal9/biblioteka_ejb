@@ -1,6 +1,5 @@
 package jsf.dao;
 
-import java.lang.invoke.StringConcatFactory;
 import java.util.List;
 import java.util.Map;
 
@@ -101,26 +100,30 @@ public class BookstockDAO {
 
 		queryFilter.setBookinfo(b);
 		queryFilter.setCode((String) filterParams.get("code"));
-//		queryFilter.setStatus((byte) filterParams.get("status"));
+		queryFilter.setStatus((byte) filterParams.get("status"));
 
+		if (queryFilter.getStatus() == 0) {
+			where = "where b.status !=:status ";
+		} else {
+			where = "where b.status =:status ";
+		}
 		where = this.createWhere("code", queryFilter.getCode(), where);
 		where = this.createWhere("title", queryFilter.getBookinfo().getTitle(), where);
-//		if (queryFilter.getStatus() == 0 || queryFilter.getStatus() == 1) {
-//			where = "where b.status =:status ";
-//		}
 		
 		return where;
 	}
 
 	private void setFilterParam(Map<String, Object> filterParams) {
-//		if (queryFilter.getStatus() == 0 || queryFilter.getStatus() == 1) {
-//			query.setParameter("status", queryFilter.getStatus());
-//		}
+		if (queryFilter.getStatus() == 0 || queryFilter.getStatus() == 1 || queryFilter.getStatus() == 2) {
+			query.setParameter("status", (byte) queryFilter.getStatus());
+		} else if (queryFilter.getStatus() == 3) {
+			query.setParameter("status", (byte) 0);
+		}
 		if (queryFilter.getCode() != null) {
-			query.setParameter("code", queryFilter.getCode());
+			query.setParameter("code", "%" + queryFilter.getCode() + "%");
 		}
 		if (queryFilter.getBookinfo().getTitle() != null) {
-			query.setParameter("title", queryFilter.getBookinfo().getTitle());
+			query.setParameter("title", "%" + queryFilter.getBookinfo().getTitle() + "%");
 		}
 	}
 
