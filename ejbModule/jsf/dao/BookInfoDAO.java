@@ -60,6 +60,32 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return list;
 	}
 
+	public long countBooks(Bookinfo book, String mode) {
+		long count = 0;
+		String where ="";
+		
+		if(mode.equals("all")){
+			where = "WHERE b.bookinfo =:title AND b.status !=:status";
+			query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
+			query.setParameter("title", book);
+			query.setParameter("status", (byte) 0);
+		}
+		if(mode.equals("free")){
+			where = "WHERE b.bookinfo =:title AND b.status =:status";
+			query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
+			query.setParameter("title", book);
+			query.setParameter("status", (byte) 1);
+		}	
+		
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return count;
+	}
+
 	public List<Bookinfo> getLazyList(Map<String, Object> filterParams, int offset, int pageSize) {
 		List<Bookinfo> list = null;
 
