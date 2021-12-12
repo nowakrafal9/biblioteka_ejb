@@ -80,6 +80,26 @@ public class BorrowerDAO {
 
 		return count;
 	}
+	
+	public boolean checkExist(String borrowerCode) {
+		long count = 0;
+		
+		String where = "WHERE b.borrowerCode =:borrowerCode ";
+		query = em.createQuery("SELECT COUNT(b) FROM Borrower b " + where);
+		query.setParameter("borrowerCode", borrowerCode);
+		
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		if(count == 0) {
+			return false;
+		}
+		
+		return true;
+	}
 
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
