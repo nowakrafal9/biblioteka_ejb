@@ -44,7 +44,7 @@ public class BookstockDAO {
 	public void setQueryFilter(Bookstock queryFilter) {
 		this.queryFilter = queryFilter;
 	}
-
+	
 	public List<Bookstock> getFullList() {
 		List<Bookstock> list = null;
 
@@ -92,6 +92,25 @@ public class BookstockDAO {
 		return count;
 	}
 
+	public Boolean checkExist(String code) {
+		long count = 0;
+		
+		String where = "WHERE b.code =:code ";
+		query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
+		query.setParameter("code", code);
+		
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		if(count == 0) {
+			return false;
+		}
+		return true;
+	}
+	
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 

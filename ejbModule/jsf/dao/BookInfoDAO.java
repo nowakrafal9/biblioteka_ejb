@@ -62,21 +62,21 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 
 	public long countBooks(Bookinfo book, String mode) {
 		long count = 0;
-		String where ="";
-		
-		if(mode.equals("all")){
+		String where = "";
+
+		if (mode.equals("all")) {
 			where = "WHERE b.bookinfo =:title AND b.status !=:status";
 			query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
 			query.setParameter("title", book);
 			query.setParameter("status", (byte) 0);
 		}
-		if(mode.equals("free")){
+		if (mode.equals("free")) {
 			where = "WHERE b.bookinfo =:title AND b.status =:status";
 			query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
 			query.setParameter("title", book);
 			query.setParameter("status", (byte) 1);
-		}	
-		
+		}
+
 		try {
 			count = (long) query.getSingleResult();
 		} catch (Exception e) {
@@ -118,6 +118,26 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		}
 
 		return count;
+	}
+
+	public boolean checkExist(String code) {
+		long count = 0;
+
+		String where = "WHERE b.code =:code ";
+		query = em.createQuery("SELECT COUNT(b) FROM Bookinfo b " + where);
+		query.setParameter("code", code);
+
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (count == 1) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private String setFilter(Map<String, Object> filterParams) {
@@ -185,4 +205,20 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return where;
 	}
 
+	public int getTitleID(String code) {
+		int id = 0;
+		String where = "";
+		
+		where = createWhere("code", code, where);
+		query = em.createQuery("SELECT b.idTitle FROM Bookinfo b " + where);
+		query.setParameter("code", code);
+		
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return id;
+	}
 }
