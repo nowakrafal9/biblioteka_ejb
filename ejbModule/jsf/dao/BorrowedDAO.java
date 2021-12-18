@@ -93,7 +93,7 @@ public class BorrowedDAO {
 	public long countBorrowedBooks(Borrower borrower) {
 		long count = 0;
 		
-		String where = "WHERE br.idBorrower =:idBorrower";
+		String where = "WHERE br.idBorrower =:idBorrower AND b.status = 1";
 		String join = "INNER JOIN b.borrower br ";
 		query = em.createQuery("SELECT COUNT(b) FROM Borrowed b " + join + where);
 		query.setParameter("idBorrower", borrower.getIdBorrower());

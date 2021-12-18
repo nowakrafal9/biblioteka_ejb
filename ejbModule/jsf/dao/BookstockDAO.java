@@ -165,4 +165,21 @@ public class BookstockDAO {
 
 		return where;
 	}
+	
+	public int getBookID(String bookCode) {
+		int id = 0;
+		String where = "";
+		
+		where = createWhere("code", bookCode, where);
+		query = em.createQuery("SELECT b.idBook FROM Bookstock b " + where);
+		query.setParameter("code", bookCode);
+		
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return id;
+	}
 }

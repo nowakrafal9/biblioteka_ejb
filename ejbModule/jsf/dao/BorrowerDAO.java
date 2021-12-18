@@ -153,4 +153,21 @@ public class BorrowerDAO {
 
 		return where;
 	}
+	
+	public int getBorrowerID(String borrowerCode) {
+		int id = 0;
+		String where = "";
+		
+		where = createWhere("borrowerCode", borrowerCode, where);
+		query = em.createQuery("SELECT b.idBorrower FROM Borrower b " + where);
+		query.setParameter("borrowerCode", borrowerCode);
+		
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return id;
+	}
 }
