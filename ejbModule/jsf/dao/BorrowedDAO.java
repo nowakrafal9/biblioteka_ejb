@@ -90,6 +90,40 @@ public class BorrowedDAO {
 		return count;
 	}
 
+	public long countBorrowedBooks(Borrower borrower) {
+		long count = 0;
+		
+		String where = "WHERE br.idBorrower =:idBorrower";
+		String join = "INNER JOIN b.borrower br ";
+		query = em.createQuery("SELECT COUNT(b) FROM Borrowed b " + join + where);
+		query.setParameter("idBorrower", borrower.getIdBorrower());
+		
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return count;
+	}
+	
+	public List<Borrowed> getBorrowInfo(Bookstock book){
+		List<Borrowed> list = null;
+		
+		String where = "WHERE bs.code =:code ";
+		String join = "INNER JOIN b.bookstock bs ";
+		query = em.createQuery("SELECT b FROM Borrowed b " + join + where);
+		query.setParameter("code", book.getCode());
+		
+		try {
+			list = query.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return list;
+	}
+	
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 
@@ -146,4 +180,6 @@ public class BorrowedDAO {
 
 		return where;
 	}
+	
+	
 }
