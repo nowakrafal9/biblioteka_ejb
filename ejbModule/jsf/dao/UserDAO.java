@@ -164,4 +164,21 @@ public class UserDAO {
 
 		return roles;
 	}
+	
+	public int getUserID(String login) {
+		int id = 0;
+		String where = "";
+		
+		where = createWhere("login", login, where);
+		query = em.createQuery("SELECT u.idUser FROM User u " + where);
+		query.setParameter("login", login);
+		
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return id;
+	}
 }
