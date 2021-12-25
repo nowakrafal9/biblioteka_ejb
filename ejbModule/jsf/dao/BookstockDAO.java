@@ -44,7 +44,7 @@ public class BookstockDAO {
 	public void setQueryFilter(Bookstock queryFilter) {
 		this.queryFilter = queryFilter;
 	}
-	
+
 	public List<Bookstock> getFullList() {
 		List<Bookstock> list = null;
 
@@ -63,7 +63,10 @@ public class BookstockDAO {
 		List<Bookstock> list = null;
 
 		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT b FROM Bookstock b INNER JOIN b.bookinfo bi " + where).setFirstResult(offset)
+		String join = "";
+		join += "INNER JOIN b.bookinfo bi ";
+		String orderBy = this.setOrder(filterParams);
+		query = em.createQuery("SELECT b FROM Bookstock b " + join + where + orderBy).setFirstResult(offset)
 				.setMaxResults(pageSize);
 		this.setFilterParam(filterParams);
 
@@ -80,7 +83,9 @@ public class BookstockDAO {
 		long count = 0;
 
 		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT COUNT(b) FROM Bookstock b INNER JOIN b.bookinfo bi " + where);
+		String join = "";
+		join += "INNER JOIN b.bookinfo bi ";
+		query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + join + where);
 		this.setFilterParam(filterParams);
 
 		try {
@@ -94,23 +99,41 @@ public class BookstockDAO {
 
 	public Boolean checkExist(String code) {
 		long count = 0;
-		
-		String where = "WHERE b.code =:code ";
+		String where = "";
+
+		where = createWhere("code", code, where);
 		query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
 		query.setParameter("code", code);
-		
+
 		try {
 			count = (long) query.getSingleResult();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		if(count == 0) {
+
+		if (count == 0) {
 			return false;
 		}
 		return true;
 	}
-	
+
+	public int getBookID(String bookCode) {
+		int id = 0;
+		String where = "";
+
+		where = createWhere("code", bookCode, where);
+		query = em.createQuery("SELECT b.idBook FROM Bookstock b " + where);
+		query.setParameter("code", bookCode);
+
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 
@@ -128,7 +151,7 @@ public class BookstockDAO {
 		}
 		where = this.createWhere("code", queryFilter.getCode(), where);
 		where = this.createWhere("title", queryFilter.getBookinfo().getTitle(), where);
-		
+
 		return where;
 	}
 
@@ -144,6 +167,26 @@ public class BookstockDAO {
 		if (queryFilter.getBookinfo().getTitle() != null) {
 			query.setParameter("title", "%" + queryFilter.getBookinfo().getTitle() + "%");
 		}
+	}
+
+	private String setOrder(Map<String, Object> filterParams) {
+		String orderBy = "";
+		String order = (String) filterParams.get("orderBy");
+
+		if (order != null) {
+			if(order.equals("code")) {
+				orderBy = "ORDER BY b." + order;
+			}
+			if(order.equals("title")) {
+				orderBy = "ORDER BY bi." + order;
+			}
+
+			if (!order.equals("code")) {
+				orderBy += ", b.code";
+			}
+		}
+
+		return orderBy;
 	}
 
 	private String createWhere(String paramName, String param, String currentWhere) {
@@ -165,21 +208,5 @@ public class BookstockDAO {
 
 		return where;
 	}
-	
-	public int getBookID(String bookCode) {
-		int id = 0;
-		String where = "";
-		
-		where = createWhere("code", bookCode, where);
-		query = em.createQuery("SELECT b.idBook FROM Bookstock b " + where);
-		query.setParameter("code", bookCode);
-		
-		try {
-			id = (int) query.getSingleResult();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return id;
-	}
+
 }

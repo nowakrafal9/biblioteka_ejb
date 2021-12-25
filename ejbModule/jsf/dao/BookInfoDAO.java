@@ -60,6 +60,46 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return list;
 	}
 
+	public List<Bookinfo> getLazyList(Map<String, Object> filterParams, int offset, int pageSize) {
+		List<Bookinfo> list = null;
+
+		String join = "";
+		join += "INNER JOIN b.author a ";
+		join += "INNER JOIN b.publisher p ";
+		String where = this.setFilter(filterParams);
+		String orderBy = this.setOrder(filterParams);
+		query = em.createQuery("SELECT b FROM Bookinfo b " + join + where + orderBy).setFirstResult(offset)
+				.setMaxResults(pageSize);
+		this.setFilterParam(filterParams);
+
+		try {
+			list = query.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public long countLazyList(Map<String, Object> filterParams) {
+		long count = 0;
+
+		String join = "";
+		join += "INNER JOIN b.author a ";
+		join += "INNER JOIN b.publisher p ";
+		String where = this.setFilter(filterParams);
+		query = em.createQuery("SELECT COUNT(b) FROM Bookinfo b " + join + where);
+		this.setFilterParam(filterParams);
+
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return count;
+	}
+
 	public long countBooks(Bookinfo book, String mode) {
 		long count = 0;
 		String where = "";
@@ -86,44 +126,11 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return count;
 	}
 
-	public List<Bookinfo> getLazyList(Map<String, Object> filterParams, int offset, int pageSize) {
-		List<Bookinfo> list = null;
-
-		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT b FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where)
-				.setFirstResult(offset).setMaxResults(pageSize);
-		this.setFilterParam(filterParams);
-
-		try {
-			list = query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return list;
-	}
-
-	public long countLazyList(Map<String, Object> filterParams) {
-		long count = 0;
-
-		String where = this.setFilter(filterParams);
-		query = em
-				.createQuery("SELECT COUNT(b) FROM Bookinfo b INNER JOIN b.author a INNER JOIN b.publisher p " + where);
-		this.setFilterParam(filterParams);
-
-		try {
-			count = (long) query.getSingleResult();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return count;
-	}
-
 	public boolean checkExist(String code) {
 		long count = 0;
+		String where = "";
 
-		String where = "WHERE b.code =:code ";
+		where = this.createWhere("code", code, where);
 		query = em.createQuery("SELECT COUNT(b) FROM Bookinfo b " + where);
 		query.setParameter("code", code);
 
@@ -138,6 +145,23 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		}
 
 		return false;
+	}
+
+	public int getTitleID(String code) {
+		int id = 0;
+		String where = "";
+
+		where = createWhere("code", code, where);
+		query = em.createQuery("SELECT b.idTitle FROM Bookinfo b " + where);
+		query.setParameter("code", code);
+
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return id;
 	}
 
 	private String setFilter(Map<String, Object> filterParams) {
@@ -182,6 +206,29 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		}
 	}
 
+	private String setOrder(Map<String, Object> filterParams) {
+		String orderBy = "";
+		String order = (String) filterParams.get("orderBy");
+		
+		if (order != null) {
+			if(order.equals("code") || order.equals("title")) {
+				orderBy = "ORDER BY b." + order;
+			}
+			if(order.equals("name") || order.equals("surname")) {
+				orderBy = "ORDER BY a." + order;
+			}
+			if(order.equals("publisher")) {
+				orderBy = "ORDER BY p.name";
+			}
+			
+			if (!order.equals("code")) {
+				orderBy += ", b.code";
+			}
+		}
+
+		return orderBy;
+	}
+
 	private String createWhere(String paramName, String param, String currentWhere) {
 		String where = currentWhere;
 
@@ -191,6 +238,7 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 			} else {
 				where += "and ";
 			}
+
 			if (paramName.equals("code") || paramName.equals("title")) {
 				where += "b." + paramName + " like :" + paramName + " ";
 			}
@@ -205,20 +253,4 @@ public class BookInfoDAO /* TitleInfoDAO */ {
 		return where;
 	}
 
-	public int getTitleID(String code) {
-		int id = 0;
-		String where = "";
-		
-		where = createWhere("code", code, where);
-		query = em.createQuery("SELECT b.idTitle FROM Bookinfo b " + where);
-		query.setParameter("code", code);
-		
-		try {
-			id = (int) query.getSingleResult();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return id;
-	}
 }

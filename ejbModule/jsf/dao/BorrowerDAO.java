@@ -54,7 +54,8 @@ public class BorrowerDAO {
 		List<Borrower> list = null;
 
 		String where = this.setFilter(filterParams);
-		query = em.createQuery("SELECT b FROM Borrower b " + where).setFirstResult(offset).setMaxResults(pageSize);
+		String orderBy = this.setOrder(filterParams);
+		query = em.createQuery("SELECT b FROM Borrower b " + where + orderBy).setFirstResult(offset).setMaxResults(pageSize);
 		this.setFilterParam(filterParams);
 
 		try {
@@ -64,7 +65,7 @@ public class BorrowerDAO {
 		}
 		return list;
 	}
-
+	
 	public long countLazyList(Map<String, Object> filterParams) {
 		long count = 0;
 
@@ -80,27 +81,45 @@ public class BorrowerDAO {
 
 		return count;
 	}
-	
+
 	public boolean checkExist(String borrowerCode) {
 		long count = 0;
+		String where = "";
 		
-		String where = "WHERE b.borrowerCode =:borrowerCode ";
+		where = this.createWhere("borrowerCode", borrowerCode, where);
 		query = em.createQuery("SELECT COUNT(b) FROM Borrower b " + where);
 		query.setParameter("borrowerCode", borrowerCode);
-		
+
 		try {
 			count = (long) query.getSingleResult();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		if(count == 0) {
+
+		if (count == 0) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
+	public int getBorrowerID(String borrowerCode) {
+		int id = 0;
+		String where = "";
+
+		where = createWhere("borrowerCode", borrowerCode, where);
+		query = em.createQuery("SELECT b.idBorrower FROM Borrower b " + where);
+		query.setParameter("borrowerCode", borrowerCode);
+
+		try {
+			id = (int) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+	
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 
@@ -139,6 +158,21 @@ public class BorrowerDAO {
 		}
 	}
 
+	private String setOrder(Map<String, Object> filterParams) {
+		String orderBy="";
+		String order = (String) filterParams.get("orderBy");
+		
+		if(order != null) {
+			orderBy = "ORDER BY b." + order;
+			
+			if(!order.equals("borrowerCode")) {
+				orderBy += ", b.borrowerCode";
+			}
+		}
+		
+		return orderBy;
+	}
+		
 	private String createWhere(String paramName, String param, String currentWhere) {
 		String where = currentWhere;
 
@@ -148,26 +182,12 @@ public class BorrowerDAO {
 			} else {
 				where += "and ";
 			}
+			
 			where += "b." + paramName + " like :" + paramName + " ";
 		}
 
 		return where;
 	}
+
 	
-	public int getBorrowerID(String borrowerCode) {
-		int id = 0;
-		String where = "";
-		
-		where = createWhere("borrowerCode", borrowerCode, where);
-		query = em.createQuery("SELECT b.idBorrower FROM Borrower b " + where);
-		query.setParameter("borrowerCode", borrowerCode);
-		
-		try {
-			id = (int) query.getSingleResult();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return id;
-	}
 }

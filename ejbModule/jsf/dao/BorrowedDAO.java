@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.criteria.Join;
 
 import jsf.entities.Bookstock;
 import jsf.entities.Borrowed;
@@ -59,7 +60,9 @@ public class BorrowedDAO {
 		String join = "";
 		join += "INNER JOIN b.bookstock bs ";
 		join += "INNER JOIN b.borrower br ";
-		query = em.createQuery("SELECT b FROM Borrowed b " + join + where);
+		String orderBy = this.setOrder(filterParams);
+		query = em.createQuery("SELECT b FROM Borrowed b " + join + where + orderBy).setFirstResult(offset)
+				.setMaxResults(pageSize);
 		this.setFilterParam(filterParams);
 
 		try {
@@ -92,38 +95,40 @@ public class BorrowedDAO {
 
 	public long countBorrowedBooks(Borrower borrower) {
 		long count = 0;
-		
+
 		String where = "WHERE br.idBorrower =:idBorrower AND b.status = 1";
-		String join = "INNER JOIN b.borrower br ";
+		String join = "";
+		join += "INNER JOIN b.borrower br ";
 		query = em.createQuery("SELECT COUNT(b) FROM Borrowed b " + join + where);
 		query.setParameter("idBorrower", borrower.getIdBorrower());
-		
+
 		try {
 			count = (long) query.getSingleResult();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return count;
 	}
-	
-	public List<Borrowed> getBorrowInfo(Bookstock book){
+
+	public List<Borrowed> getBorrowInfo(Bookstock book) {
 		List<Borrowed> list = null;
-		
+
 		String where = "WHERE bs.code =:code ";
-		String join = "INNER JOIN b.bookstock bs ";
+		String join = "";
+		join += "INNER JOIN b.bookstock bs ";
 		query = em.createQuery("SELECT b FROM Borrowed b " + join + where);
 		query.setParameter("code", book.getCode());
-		
+
 		try {
 			list = query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return list;
 	}
-	
+
 	private String setFilter(Map<String, Object> filterParams) {
 		String where = "";
 
@@ -131,34 +136,57 @@ public class BorrowedDAO {
 		bs.setCode((String) filterParams.get("bookCode"));
 		Borrower br = new Borrower();
 		br.setBorrowerCode((String) filterParams.get("borrowerCode"));
-		
+
 		queryFilter.setBookstock(bs);
 		queryFilter.setBorrower(br);
 		queryFilter.setStatus((byte) filterParams.get("status"));
-		
+
 		where = "where b.status =:status ";
-		if((byte) filterParams.get("returnStatus") == 1) {
-			where += "AND b.returnDue >=:todayDate";
-		}else if((byte) filterParams.get("returnStatus") == 2) {
-			where += "AND b.returnDue <:todayDate";
+		if ((byte) filterParams.get("returnStatus") == 1) {
+			where += "AND b.returnDue >=:todayDate ";
+		} else if ((byte) filterParams.get("returnStatus") == 2) {
+			where += "AND b.returnDue <:todayDate ";
 		}
 		where = this.createWhere("bookCode", queryFilter.getBookstock().getCode(), where);
 		where = this.createWhere("borrowerCode", queryFilter.getBorrower().getBorrowerCode(), where);
-				
+
 		return where;
 	}
 
 	private void setFilterParam(Map<String, Object> filterParams) {
 		query.setParameter("status", queryFilter.getStatus());
-		if((byte) filterParams.get("returnStatus") != 0) {
+		if ((byte) filterParams.get("returnStatus") != 0) {
 			query.setParameter("todayDate", java.sql.Date.valueOf(java.time.LocalDate.now()));
 		}
-		if(queryFilter.getBookstock().getCode() != null) {
+		if (queryFilter.getBookstock().getCode() != null) {
 			query.setParameter("code", "%" + queryFilter.getBookstock().getCode() + "%");
 		}
-		if(queryFilter.getBorrower().getBorrowerCode() != null) {
+		if (queryFilter.getBorrower().getBorrowerCode() != null) {
 			query.setParameter("borrowerCode", "%" + queryFilter.getBorrower().getBorrowerCode() + "%");
 		}
+	}
+
+	private String setOrder(Map<String, Object> filterParams) {
+		String orderBy = "";
+		String order = (String) filterParams.get("orderBy");
+
+		if (order != null) {
+			if (order.equals("bookCode")) {
+				orderBy = "ORDER BY bs.code";
+			}
+			if (order.equals("borrowerCode")) {
+				orderBy = "ORDER BY br." + order;
+			}
+			if (order.equals("borrowDate") || order.equals("returnDue")) {
+				orderBy = "ORDER BY b." + order;
+			}
+			
+			if (!order.equals("code")) {
+				orderBy += ", bs.code";
+			}
+		}
+
+		return orderBy;
 	}
 
 	private String createWhere(String paramName, String param, String currentWhere) {
@@ -170,16 +198,16 @@ public class BorrowedDAO {
 			} else {
 				where += "and ";
 			}
-			if(paramName.equals("bookCode")) {
-				where += "bs.code like :code";
+			
+			if (paramName.equals("bookCode")) {
+				where += "bs.code like :code ";
 			}
-			if(paramName.equals("borrowerCode")) {
-				where += "br.borrowerCode like :borrowerCode";
+			if (paramName.equals("borrowerCode")) {
+				where += "br.borrowerCode like :borrowerCode ";
 			}
 		}
 
 		return where;
 	}
-	
-	
+
 }
