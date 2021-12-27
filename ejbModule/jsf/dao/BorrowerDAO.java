@@ -103,6 +103,29 @@ public class BorrowerDAO {
 		return true;
 	}
 
+	public boolean checkActive(String borrowerCode) {
+		long count = 0;
+		String where = "";
+		
+		where = "WHERE b.status=:status ";
+		where = this.createWhere("borrowerCode", borrowerCode, where);
+		query = em.createQuery("SELECT COUNT(b) FROM Borrower b " + where);
+		query.setParameter("status", (byte) 1);
+		query.setParameter("borrowerCode", borrowerCode);
+
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (count == 0) {
+			return false;
+		}
+
+		return true;
+	}
+	
 	public int getBorrowerID(String borrowerCode) {
 		int id = 0;
 		String where = "";

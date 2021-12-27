@@ -117,6 +117,28 @@ public class BookstockDAO {
 		return true;
 	}
 
+	public Boolean checkBorrowed(String code) {
+		long count = 0;
+		String where = "";
+
+		where = "WHERE b.status=:status ";
+		where = createWhere("code", code, where);
+		query = em.createQuery("SELECT COUNT(b) FROM Bookstock b " + where);
+		query.setParameter("status", (byte) 1);
+		query.setParameter("code", code);
+
+		try {
+			count = (long) query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (count == 0) {
+			return false;
+		}
+		return true;
+	}
+	
 	public int getBookID(String bookCode) {
 		int id = 0;
 		String where = "";
