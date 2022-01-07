@@ -114,7 +114,7 @@ public class BorrowedDAO {
 	public List<Borrowed> getBorrowInfo(Bookstock book) {
 		List<Borrowed> list = null;
 
-		String where = "WHERE bs.code =:code ";
+		String where = "WHERE bs.code =:code AND b.status = 1";
 		String join = "";
 		join += "INNER JOIN b.bookstock bs ";
 		query = em.createQuery("SELECT b FROM Borrowed b " + join + where);
